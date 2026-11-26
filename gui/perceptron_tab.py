@@ -518,15 +518,18 @@ class PerceptronTab(tk.Frame):
 
             for entry in self.inputs:
 
-                value = float(entry.get())
+                if entry.get().strip() == "":
+                   raise ValueError("Please fill in all three input fields.")
 
+                try:
+                  value = float(entry.get())
+                except ValueError:
+                  raise ValueError("Please enter valid numeric values.")
+    
                 if not math.isfinite(value):
-                    raise ValueError("Invalid input value")
+                  raise ValueError("Please enter finite numeric values.")
 
                 inputs.append(value)
-
-            if not 0 <= inputs[0] <= 1:
-                raise ValueError("Current fill must be between 0 and 1")
 
             output = self.model.predict(inputs)
 

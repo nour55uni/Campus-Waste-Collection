@@ -68,15 +68,29 @@ class Perceptron:
 
         self.Bias = random.uniform(-1, 1)
 
-
-    def predict(self, inputs):
-
+    def validate_inputs(self, inputs):
         if len(inputs) != 3:
             raise ValueError("Three inputs are required")
+
+        for value in inputs:
+           if not math.isfinite(value):
+             raise ValueError("Invalid numeric value")
+ 
+        if not 0 <= inputs[0] <= 1:
+           raise ValueError("Current fill must be between 0 and 1")
+
+        if not -1 <= inputs[1] <= 1:
+           raise ValueError("Recent fill change must be between -1 and 1")
+
+        if not 0 <= inputs[2] <= 1:
+           raise ValueError("Time since collection must be between 0 and 1")
+
+    def predict(self, inputs):
 
         if not self.is_trained:
             raise ValueError("Train the model first")
 
+        self.validate_inputs(inputs)
         return self.calculate_output(inputs)
 
 

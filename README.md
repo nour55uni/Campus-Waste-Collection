@@ -60,24 +60,24 @@ A Python application that helps a campus waste collection team decide which bins
 
 **Algorithm:**
 
-- [ ] Read the provided CSV datasets.
-- [ ] Implement Perceptron from scratch using three weights and a bias.
-- [ ] Train the model using the training dataset.
-- [ ] Evaluate the final model using the test dataset once.
-- [ ] Calculate test accuracy.
-- [ ] Calculate missed pickups and false pickup alerts.
-- [ ] Implement prediction using three input readings.
-- [ ] Make the trained model available to the Simulated Annealing component.
+- [x] Read the provided CSV datasets.
+- [x] Implement Perceptron from scratch using three weights and a bias.
+- [x] Train the model using the training dataset.
+- [x] Evaluate the final model using the test dataset.
+- [x] Calculate test accuracy.
+- [x] Calculate missed pickups and false pickup alerts.
+- [x] Implement prediction using three input readings.
+- [x] Make the trained model available to the Simulated Annealing component.
 
 **GUI:**
 
-- [ ] Create the Perceptron tab.
-- [ ] Add the Train and Test button.
-- [ ] Display evaluation results.
-- [ ] Add three input fields and a Predict button.
-- [ ] Display Pickup (+1) or No Pickup (-1).
-- [ ] Display the current fill status.
-- [ ] Validate inputs and test functionality.
+- [x] Create the Perceptron tab.
+- [x] Add the Train and Test button.
+- [x] Display evaluation results.
+- [x] Add three input fields and a Predict button.
+- [x] Display Pickup (+1) or No Pickup (-1).
+- [x] Display the current fill status.
+- [x] Validate inputs and test functionality.
 
 ### Member 2 — Simulated Annealing & GUI
 
