@@ -4,7 +4,6 @@ import sys
 import tkinter as tk
 from tkinter import ttk, messagebox
 
-# Let Python find the "algorithms" folder when this file is run directly
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from algorithms.simulated_annealing import (
@@ -16,7 +15,6 @@ from algorithms.simulated_annealing import (
 )
 
 
-# Colors (same as the Perceptron tab, so the whole app looks the same)
 BG = "#eef3f1"
 WHITE = "#ffffff"
 GREEN = "#236b59"
@@ -30,48 +28,34 @@ class AnnealingTab(tk.Frame):
     def __init__(self, parent, model, on_route_planned=None):
         super().__init__(parent, bg=BG)
 
-        # The SAME Perceptron object used by the Perceptron tab
         self.model = model
 
-        # Optional function from Member 3 (visualization).
-        # It is called as on_route_planned(bins, result):
-        #   - after Plan Route:            result = the dictionary from simulated_annealing()
-        #   - when the old route is gone:  result = None   (new bins or an edited reading)
         self.on_route_planned = on_route_planned
-        # The bins shown in the table (list of dictionaries from create_bins)
         self.bins = []
 
-        # The small entry box used to edit one table cell (None = not editing)
         self.editor = None
 
-        # The last result of simulated_annealing() (None = no route planned yet)
         self.last_result = None
 
-        # Values shown in the result section
         self.pickup_count = tk.StringVar(value="--")
         self.best_distance = tk.StringVar(value="--")
         self.iterations = tk.StringVar(value="--")
         self.route_text = tk.StringVar(value="--")
 
-        # Values of the input boxes (defaults from the project description)
         self.bin_count = tk.StringVar(value="10")
         self.initial_temp = tk.StringVar(value="60")
         self.cooling_rate = tk.StringVar(value="0.997")
 
-        # Status line under the buttons
         self.status = tk.StringVar(value="Click 'Create Bins' to start")
 
         self.columnconfigure(0, weight=1)
-        self.rowconfigure(2, weight=1)       # the table row grows with the window
+        self.rowconfigure(2, weight=1)
 
         self.create_header()
         self.create_settings()
         self.create_table()
         self.create_result()
 
-    # ------------------------------------------------------------------
-    # Layout
-    # ------------------------------------------------------------------
     def create_header(self):
 
         frame = tk.Frame(self, bg=DARK_GREEN, padx=8, pady=5)
@@ -106,7 +90,6 @@ class AnnealingTab(tk.Frame):
             fg=DARK_GREEN
         ).grid(row=0, column=0, columnspan=7, sticky="w", pady=(0, 4))
 
-        # --- Bin count + Create Bins ---
         tk.Label(frame, text="Bin Count", bg=WHITE).grid(row=1, column=0, sticky="w", padx=5)
         ttk.Entry(frame, textvariable=self.bin_count, width=8).grid(row=2, column=0, sticky="w", padx=5)
 
@@ -119,14 +102,12 @@ class AnnealingTab(tk.Frame):
             relief="flat", cursor="hand2", width=14
         ).grid(row=2, column=1, padx=(5, 25))
 
-        # --- Initial temperature + cooling rate ---
         tk.Label(frame, text="Initial Temperature", bg=WHITE).grid(row=1, column=2, sticky="w", padx=5)
         ttk.Entry(frame, textvariable=self.initial_temp, width=10).grid(row=2, column=2, sticky="w", padx=5)
 
         tk.Label(frame, text="Cooling Rate", bg=WHITE).grid(row=1, column=3, sticky="w", padx=5)
         ttk.Entry(frame, textvariable=self.cooling_rate, width=10).grid(row=2, column=3, sticky="w", padx=5)
 
-        # --- Plan Route ---
         tk.Button(
             frame,
             text="Plan Route",
@@ -136,7 +117,6 @@ class AnnealingTab(tk.Frame):
             relief="flat", cursor="hand2", width=14
         ).grid(row=2, column=4, padx=(25, 5))
 
-        # --- Status line ---
         tk.Label(
             frame,
             textvariable=self.status,
@@ -160,7 +140,6 @@ class AnnealingTab(tk.Frame):
             fg=DARK_GREEN
         ).grid(row=0, column=0, sticky="w", pady=(0, 4))
 
-        # Column id -> heading text shown to the user
         self.columns = ("id", "x", "y", "x1", "x2", "x3", "prediction")
         headings = {
             "id": "Bin ID",
@@ -172,29 +151,24 @@ class AnnealingTab(tk.Frame):
             "prediction": "Prediction",
         }
 
-        # Treeview with show="headings" = a simple table
         self.table = ttk.Treeview(frame, columns=self.columns, show="headings", height=8)
 
         for col in self.columns:
             self.table.heading(col, text=headings[col])
             self.table.column(col, width=110, anchor="center")
 
-        # Scroll bar for many bins
         scroll = ttk.Scrollbar(frame, orient="vertical", command=self.table.yview)
         self.table.configure(yscrollcommand=scroll.set)
 
         self.table.grid(row=1, column=0, sticky="nsew")
         scroll.grid(row=1, column=1, sticky="ns")
 
-        # Text colour of a row depends on its prediction
         self.table.tag_configure("pickup", foreground=ORANGE)
         self.table.tag_configure("no_pickup", foreground=GREEN)
 
-        # Double-click a reading to edit it
         self.table.bind("<Double-1>", self.on_double_click)
 
     def refresh_table(self):
-        """Delete all rows and draw them again from self.bins."""
         for row in self.table.get_children():
             self.table.delete(row)
 
@@ -208,10 +182,9 @@ class AnnealingTab(tk.Frame):
                 prediction_text = "No Pickup (-1)"
                 tag = "no_pickup"
             else:
-                prediction_text = "--"          # not classified yet
+                prediction_text = "--"
                 tag = ""
 
-            # iid = the row id inside the table; we use the list index
             self.table.insert(
                 "", "end", iid=str(index), tags=(tag,),
                 values=(b["id"], b["x"], b["y"], b["x1"], b["x2"], b["x3"], prediction_text)
@@ -233,7 +206,6 @@ class AnnealingTab(tk.Frame):
             fg=DARK_GREEN
         ).grid(row=0, column=0, columnspan=3, sticky="w", pady=(0, 4))
 
-        # Three small cards, same style as the Perceptron results
         cards = [
             ("Pickup Bins", self.pickup_count),
             ("Best Distance", self.best_distance),
@@ -255,7 +227,6 @@ class AnnealingTab(tk.Frame):
                 fg=GREEN
             ).pack(pady=1)
 
-        # The route as text: Depot -> Bin 3 -> ... -> Depot
         tk.Label(frame, text="Best Route", bg=WHITE, fg=GRAY).grid(
             row=2, column=0, columnspan=3, sticky="w", padx=3, pady=(4, 0)
         )
@@ -269,27 +240,20 @@ class AnnealingTab(tk.Frame):
             justify="left"
         ).grid(row=3, column=0, columnspan=3, sticky="w", padx=3)
 
-    # ------------------------------------------------------------------
-    # Editing a reading (x1, x2, x3) in the table
-    # ------------------------------------------------------------------
     def on_double_click(self, event):
-        """Open a small entry box over the clicked cell."""
 
-        # Only react to clicks on a cell (not on the headings)
         if self.table.identify("region", event.x, event.y) != "cell":
             return
 
-        row_id = self.table.identify_row(event.y)        # "0", "1", ... (= index in self.bins)
-        col_id = self.table.identify_column(event.x)     # "#1", "#2", ... "#7"
-        col_name = self.columns[int(col_id[1:]) - 1]     # "#4" -> self.columns[3] -> "x1"
+        row_id = self.table.identify_row(event.y)
+        col_id = self.table.identify_column(event.x)
+        col_name = self.columns[int(col_id[1:]) - 1]
 
-        # Only the three readings can be edited
         if col_name not in ("x1", "x2", "x3"):
             return
 
         self.close_editor()
 
-        # Put an Entry exactly on top of the cell
         x, y, width, height = self.table.bbox(row_id, col_id)
         self.editor = ttk.Entry(self.table, justify="center")
         self.editor.place(x=x, y=y, width=width, height=height)
@@ -299,20 +263,17 @@ class AnnealingTab(tk.Frame):
         self.editor.select_range(0, "end")
         self.editor.focus()
 
-        # Enter or clicking somewhere else -> save,  Escape -> cancel
         self.editor.bind("<Return>", lambda e: self.save_edit(index, col_name))
         self.editor.bind("<FocusOut>", lambda e: self.save_edit(index, col_name))
         self.editor.bind("<Escape>", lambda e: self.close_editor())
 
     def save_edit(self, index, col_name):
-        """Check the typed value and save it into self.bins."""
-        if self.editor is None:          # already saved or cancelled
+        if self.editor is None:
             return
 
         text = self.editor.get().strip()
         self.close_editor()
 
-        # 1) Must be a finite number
         try:
             value = float(text)
         except ValueError:
@@ -322,8 +283,6 @@ class AnnealingTab(tk.Frame):
             messagebox.showerror("Invalid Value", "Please enter a finite number.")
             return
 
-        # 2) Must be inside the ranges the Perceptron accepts.
-        #    We reuse the Perceptron's own check (Part 1), so both parts use the same rules.
         b = self.bins[index]
         new_inputs = [b["x1"], b["x2"], b["x3"]]
         new_inputs[["x1", "x2", "x3"].index(col_name)] = value
@@ -333,7 +292,6 @@ class AnnealingTab(tk.Frame):
             messagebox.showerror("Invalid Value", str(e) + "\nThe old value was kept.")
             return
 
-        # 3) Save. The old prediction is no longer valid for the new readings.
         b[col_name] = value
         b["prediction"] = None
         self.refresh_table()
@@ -341,17 +299,12 @@ class AnnealingTab(tk.Frame):
         self.status.set("%s: %s changed to %g" % (b["id"], col_name, value))
 
     def close_editor(self):
-        """Remove the entry box (if there is one)."""
         if self.editor is not None:
             editor = self.editor
-            self.editor = None           # set to None FIRST, so FocusOut does not save again
+            self.editor = None
             editor.destroy()
 
-    # ------------------------------------------------------------------
-    # Button actions
-    # ------------------------------------------------------------------
     def on_create_bins(self):
-        """Create new random bins and show them in the table."""
         self.close_editor()
         try:
             self.bins = create_bins(self.bin_count.get())
@@ -365,7 +318,6 @@ class AnnealingTab(tk.Frame):
         self.status.set("%d bins created" % len(self.bins))
 
     def clear_result(self):
-        """Empty the result section (the old route is not valid any more)."""
         self.last_result = None
         self.pickup_count.set("--")
         self.best_distance.set("--")
@@ -375,15 +327,12 @@ class AnnealingTab(tk.Frame):
         self.notify_visualization()
 
     def notify_visualization(self):
-        """Send the bins and the latest result to Member 3 (if she gave us a function)."""
         if self.on_route_planned is not None:
             self.on_route_planned(self.bins, self.last_result)
 
     def on_plan_route(self):
-        """Classify every bin with the Perceptron, then plan the route with SA."""
         self.close_editor()
 
-        # 1) Check the settings
         try:
             initial_temp, cooling_rate = validate_parameters(
                 self.initial_temp.get(), self.cooling_rate.get()
@@ -398,7 +347,6 @@ class AnnealingTab(tk.Frame):
             messagebox.showwarning("No Bins", "Click 'Create Bins' first.")
             return
 
-        # 2) Predict every bin with the trained Perceptron (Part 1)
         try:
             classify_bins(self.bins, self.model)
         except ValueError as e:
@@ -406,19 +354,16 @@ class AnnealingTab(tk.Frame):
             messagebox.showerror("Perceptron", str(e))
             return
 
-        # Show the predictions in the table
         self.refresh_table()
 
-        # 3) Keep only the Pickup bins and run Simulated Annealing on them
         pickup_bins = get_pickup_bins(self.bins)
 
         self.status.set("Planning route...")
-        self.update_idletasks()          # show the text before the work starts
+        self.update_idletasks()
 
         result = simulated_annealing(pickup_bins, initial_temp, cooling_rate)
         self.last_result = result
 
-        # 4) Show the result
         self.pickup_count.set("%d of %d" % (len(pickup_bins), len(self.bins)))
         self.best_distance.set("%.1f m" % result["best_distance"])
         self.iterations.set(str(result["iterations"]))
@@ -431,15 +376,13 @@ class AnnealingTab(tk.Frame):
         else:
             self.status.set("Route planned through %d pickup bin(s)" % len(pickup_bins))
 
-            # 5) Give the result to Member 3, so she can draw the map and the plot
-            self.notify_visualization()
+        self.notify_visualization()
+
 
 if __name__ == "__main__":
 
     from algorithms.perceptron import Perceptron
 
-    # Only for testing this tab alone: train the model here.
-    # In main.py the Perceptron tab trains it with the "Train and Test" button.
     model = Perceptron()
     model.train_and_test()
 
@@ -448,9 +391,7 @@ if __name__ == "__main__":
     root.geometry("1000x680")
     root.configure(bg=BG)
 
-
     def print_result(bins, result):
-        """A test stand-in for Member 3's drawing code: just print what she gets."""
         if result is None:
             print("[visualization] clear the plots (%d bins on the map)" % len(bins))
             return
@@ -458,7 +399,6 @@ if __name__ == "__main__":
               "| route:", [b[0] for b in result["route_with_depot"]],
               "| best: %.1f m" % result["best_distance"],
               "| history points:", len(result["current_history"]))
-
 
     tab = AnnealingTab(root, model, on_route_planned=print_result)
     tab.pack(fill="both", expand=True)
